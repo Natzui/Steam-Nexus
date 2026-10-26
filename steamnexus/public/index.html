@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Steamwave: live Steam sales</title>
+<meta name="description" content="Live Steam discounts, refreshed every couple of minutes. Click any game to open it on Steam.">
+<meta name="theme-color" content="#04050d">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E⚡%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Sora:wght@400;500;600&display=swap" rel="stylesheet">
+<script>try{var t=localStorage.getItem('sw-theme')||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');document.documentElement.dataset.theme=t}catch(e){}</script>
+<style>
+:root{color-scheme:dark;--bg1:#04050d;--bg2:#0a0e24;--tx:#eaf0ff;--mut:#98a4cc;--gl:rgba(255,255,255,.06);--gb:rgba(255,255,255,.14);--sh:0 24px 60px -20px rgba(0,0,0,.7);--a1:#22d3ee;--a2:#a78bfa;--a3:#f472b6;--ok:#4ade80;--grid:rgba(255,255,255,.045);--hi:rgba(255,255,255,.18)}
+[data-theme=light]{color-scheme:light;--bg1:#eaf0ff;--bg2:#fbeaf6;--tx:#12183a;--mut:#56608a;--gl:rgba(255,255,255,.55);--gb:rgba(255,255,255,.95);--sh:0 24px 50px -22px rgba(70,60,160,.35);--a1:#0891b2;--a2:#7c3aed;--a3:#db2777;--ok:#059669;--grid:rgba(20,30,90,.06);--hi:rgba(255,255,255,.9)}
+*{box-sizing:border-box;margin:0}
+body{font:400 16px/1.5 Sora,system-ui,sans-serif;color:var(--tx);background:linear-gradient(135deg,var(--bg1),var(--bg2)) fixed;min-height:100vh;overflow-x:hidden}
+.bg{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+.bg:after{content:"";position:absolute;inset:0;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:56px 56px;-webkit-mask:radial-gradient(ellipse at 50% 30%,#000,transparent 75%);mask:radial-gradient(ellipse at 50% 30%,#000,transparent 75%)}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.55;animation:float 18s ease-in-out infinite alternate}
+[data-theme=light] .orb{opacity:.35}
+.o1{width:480px;height:480px;background:var(--a1);top:-120px;left:-100px}
+.o2{width:520px;height:520px;background:var(--a2);top:30%;right:-160px;animation-delay:-6s}
+.o3{width:420px;height:420px;background:var(--a3);bottom:-140px;left:30%;animation-delay:-11s}
+@keyframes float{to{transform:translate(60px,-50px) scale(1.15)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.glass{background:var(--gl);border:1px solid var(--gb);-webkit-backdrop-filter:blur(18px) saturate(160%);backdrop-filter:blur(18px) saturate(160%);box-shadow:var(--sh),inset 0 1px 0 var(--hi)}
+button,input,select{font:inherit;color:inherit}
+.btn,select{background:var(--gl);border:1px solid var(--gb);border-radius:12px;padding:8px 14px;cursor:pointer;transition:transform .25s,border-color .25s,box-shadow .25s,background .25s}
+select option{color:#111}
+.btn:hover,select:hover{transform:translateY(-2px);border-color:var(--a1);box-shadow:0 0 0 3px color-mix(in srgb,var(--a1) 25%,transparent)}
+:focus-visible{outline:2px solid var(--a1);outline-offset:3px}
+header{position:sticky;top:12px;z-index:20;margin:12px auto 0;max-width:1240px;width:calc(100% - 24px);display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding:10px 16px;border-radius:20px}
+.logo{font:700 16px Unbounded;display:flex;gap:10px;align-items:center;margin-right:auto}
+.logo i{width:26px;height:26px;border-radius:8px;background:conic-gradient(from 200deg,var(--a1),var(--a2),var(--a3),var(--a1));animation:spin 6s linear infinite;box-shadow:0 0 18px var(--a2)}
+.spin{animation:spin .8s linear infinite}
+.hero{max-width:1240px;margin:56px auto 24px;padding:0 20px;text-align:center}
+.live{display:inline-flex;gap:10px;align-items:center;padding:6px 16px;border-radius:99px;font-size:13px;color:var(--mut)}
+.live b{width:9px;height:9px;border-radius:50%;background:var(--ok);animation:ping 1.8s infinite}
+@keyframes ping{0%{box-shadow:0 0 0 0 var(--ok)}70%,100%{box-shadow:0 0 0 12px transparent}}
+h1{font:700 clamp(2.2rem,6vw,4.4rem)/1.08 Unbounded;margin:22px 0 14px;letter-spacing:-.02em;background:linear-gradient(90deg,var(--a1),var(--a2),var(--a3),var(--a1));background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 8s linear infinite}
+@keyframes shine{to{background-position:300% 0}}
+.hero p{color:var(--mut);max-width:520px;margin:0 auto}
+.stats{max-width:1240px;margin:28px auto;padding:0 20px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.stat{padding:18px 20px;border-radius:20px;transition:transform .3s}
+.stat:hover{transform:translateY(-4px)}
+.stat small{color:var(--mut);font-size:13px}
+.stat strong{display:block;font:700 clamp(1.4rem,4vw,2.3rem) Unbounded;margin-top:2px}
+.bar{max-width:1240px;margin:0 auto 22px;padding:0 20px;display:flex;gap:12px;flex-wrap:wrap}
+.search{flex:1;min-width:220px;padding:12px 18px;border-radius:14px;outline:0;transition:border-color .25s,box-shadow .25s}
+.search:focus{border-color:var(--a1);box-shadow:0 0 0 4px color-mix(in srgb,var(--a1) 25%,transparent)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip.on{background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;border-color:transparent}
+.grid{max-width:1240px;margin:0 auto;padding:0 20px 60px;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr));gap:20px}
+.card{position:relative;display:block;color:inherit;text-decoration:none;border-radius:22px;overflow:hidden;transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateY(var(--ty,0px));transition:transform .25s ease-out,border-color .3s,box-shadow .3s;animation:rise .7s cubic-bezier(.2,.8,.2,1) backwards;animation-delay:calc(var(--i)*45ms)}
+@keyframes rise{from{opacity:0;transform:translateY(40px) scale(.96)}}
+.card:after{content:"";position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .3s;background:radial-gradient(360px circle at var(--mx,50%) var(--my,50%),color-mix(in srgb,var(--a2) 30%,transparent),transparent 55%)}
+.card:hover,.card:focus-visible{--ty:-8px;border-color:var(--a1);box-shadow:var(--sh),0 0 40px -6px color-mix(in srgb,var(--a1) 55%,transparent)}
+.card:hover:after{opacity:1}
+.media{position:relative;aspect-ratio:2/1;overflow:hidden;background:rgba(0,0,0,.2)}
+.media img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .7s cubic-bezier(.2,.8,.2,1),filter .4s}
+.card:hover img,.card:focus-visible img{transform:scale(1.12);filter:saturate(1.2) brightness(.45) blur(1px)}
+.badge{position:absolute;top:12px;left:12px;z-index:2;padding:5px 11px;border-radius:10px;font:700 15px Unbounded;color:#031a0c;background:var(--ok);box-shadow:0 0 22px color-mix(in srgb,var(--ok) 70%,transparent)}
+[data-theme=light] .badge{color:#fff}
+.info{position:absolute;inset:0;z-index:1;padding:12px 14px;display:flex;flex-direction:column;justify-content:flex-end;gap:5px;font-size:12.5px;color:#fff;opacity:0;transform:translateY(14px);transition:opacity .35s,transform .35s cubic-bezier(.2,.8,.2,1)}
+.card:hover .info,.card:focus-visible .info{opacity:1;transform:none}
+.row{display:flex;justify-content:space-between;gap:8px;padding:4px 10px;border-radius:9px;background:rgba(255,255,255,.14);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.row b{font-weight:600;text-align:right}
+.go{font-weight:600;color:#67e8f9;text-align:center;padding-top:2px}
+.body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:8px}
+.body h3{font:600 15px/1.3 Sora;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.price{display:flex;align-items:baseline;gap:10px}
+.price s{color:var(--mut);font-size:13px}
+.price b{font:700 18px Unbounded;background:linear-gradient(90deg,var(--a1),var(--a2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.sk{height:250px;border-radius:22px;position:relative;overflow:hidden}
+.sk:after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,var(--hi),transparent 70%);transform:translateX(-100%);animation:sh 1.4s infinite}
+@keyframes sh{to{transform:translateX(100%)}}
+.msg{grid-column:1/-1;text-align:center;padding:48px 20px;border-radius:22px;color:var(--mut);display:grid;gap:16px;justify-items:center}
+footer{text-align:center;color:var(--mut);font-size:12px;padding:0 20px 40px}
+@media(max-width:640px){.stats{gap:8px}.stat{padding:12px}.hero{margin-top:36px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="bg"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div></div>
+<header class="glass">
+  <div class="logo"><i></i>Steamwave</div>
+  <select id="cc" aria-label="Store region"><option value="us">United States</option><option value="gb">United Kingdom</option><option value="de">Europe</option><option value="ph">Philippines</option><option value="ca">Canada</option><option value="au">Australia</option></select>
+  <button class="btn" id="refresh" aria-label="Refresh deals">↻</button>
+  <button class="btn" id="theme" aria-label="Switch between light and dark mode">☀</button>
+</header>
+<main>
+  <section class="hero">
+    <div class="live glass"><b></b><span id="age">Connecting to Steam</span></div>
+    <h1>Steam sales, live right now</h1>
+    <p>Real discounts pulled from the Steam store and refreshed automatically. Hover a game for details, click it to open the store page.</p>
+  </section>
+  <section class="stats">
+    <div class="stat glass"><small>Games on sale</small><strong id="s1">0</strong></div>
+    <div class="stat glass"><small>Biggest discount</small><strong id="s2">0%</strong></div>
+    <div class="stat glass"><small>Average discount</small><strong id="s3">0%</strong></div>
+  </section>
+  <section class="bar">
+    <input class="glass search" id="q" type="search" placeholder="Search games on sale" aria-label="Search games on sale">
+    <div class="chips" id="chips"><button class="btn chip on" data-s="discount">Biggest discount</button><button class="btn chip" data-s="price">Lowest price</button><button class="btn chip" data-s="ending">Ending soon</button></div>
+  </section>
+  <section class="grid" id="grid" aria-live="polite"></section>
+</main>
+<footer>Not affiliated with Valve. Prices come from the public Steam store feed and may differ at checkout.</footer>
+<script>
+const $=s=>document.querySelector(s),
+esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),
+ls={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
+let deals=[],cc=ls.get('sw-cc')||'us',sort='discount',q='',stamp=0,busy=false;
+
+const money=(v,cur)=>{if(!v)return'Free';try{return new Intl.NumberFormat(undefined,{style:'currency',currency:cur}).format(v/100)}catch(e){return(v/100).toFixed(2)+' '+cur}};
+const left=ms=>{if(ms<=0)return'Ended';const s=Math.floor(ms/1e3),d=Math.floor(s/86400),p=n=>String(n).padStart(2,'0');return(d?d+'d ':'')+p(Math.floor(s%86400/3600))+':'+p(Math.floor(s%3600/60))+':'+p(s%60)};
+const plats=d=>[d.win&&'Windows',d.mac&&'macOS',d.linux&&'Linux'].filter(Boolean).join(', ')||'See store';
+const sorters={discount:(a,b)=>b.pct-a.pct,price:(a,b)=>a.price-b.price,ending:(a,b)=>(a.end||9e15)-(b.end||9e15)};
+
+const card=(d,i)=>`<a class="card glass" style="--i:${Math.min(i,16)}" href="https://store.steampowered.com/app/${d.id}/" target="_blank" rel="noopener noreferrer" aria-label="${esc(d.name)}, ${d.pct}% off. Open on Steam">
+<div class="media"><img loading="lazy" alt="" src="${esc(d.img)}" onerror="this.onerror=null;this.src='https://cdn.cloudflare.steamstatic.com/steam/apps/${d.id}/header.jpg'"><span class="badge">-${d.pct}%</span>
+<div class="info"><div class="row"><span>You save</span><b>${money(d.orig-d.price,d.cur)}</b></div><div class="row"><span>Ends in</span><b${d.end?` data-end="${d.end}"`:''}>${d.end?left(d.end-Date.now()):'Limited time'}</b></div><div class="row"><span>Platforms</span><b>${plats(d)}</b></div><span class="go">Open on Steam</span></div></div>
+<div class="body"><h3>${esc(d.name)}</h3><div class="price"><s>${money(d.orig,d.cur)}</s><b>${money(d.price,d.cur)}</b></div></div></a>`;
+
+function render(){
+  const list=deals.filter(d=>d.name.toLowerCase().includes(q)).sort(sorters[sort]);
+  $('#grid').innerHTML=list.length?list.map(card).join(''):'<div class="msg glass">No deals match your search. Clear it to see every sale.</div>';
+}
+function count(el,to,suf=''){const t0=performance.now();(function f(t){const p=Math.min((t-t0)/900,1);el.textContent=Math.round(to*(1-Math.pow(1-p,3)))+suf;if(p<1)requestAnimationFrame(f)})(t0)}
+function stats(){const n=deals.length;count($('#s1'),n);count($('#s2'),n?Math.max(...deals.map(d=>d.pct)):0,'%');count($('#s3'),n?deals.reduce((a,d)=>a+d.pct,0)/n:0,'%')}
+const skeleton=()=>{$('#grid').innerHTML=Array(8).fill('<div class="sk glass"></div>').join('')};
+
+async function load(){
+  if(busy)return;busy=true;$('#refresh').classList.add('spin');
+  try{
+    const r=await fetch('/api/deals?cc='+cc);if(!r.ok)throw new Error(r.status);
+    const j=await r.json();deals=j.items;stamp=j.updated;stats();render();tick();
+  }catch(e){
+    if(!deals.length){$('#age').textContent='Steam is unreachable';$('#grid').innerHTML='<div class="msg glass"><span>Could not load deals from Steam. Check your connection and try again.</span><button class="btn" onclick="load()">Try again</button></div>'}
+  }
+  busy=false;$('#refresh').classList.remove('spin');
+}
+function tick(){
+  document.querySelectorAll('[data-end]').forEach(e=>e.textContent=left(e.dataset.end-Date.now()));
+  if(stamp){const s=Math.max(0,Math.round((Date.now()-stamp)/1e3));$('#age').textContent='Live on Steam, updated '+(s<5?'just now':s<60?s+'s ago':Math.floor(s/60)+'m ago')}
+}
+
+/* theme */
+const root=document.documentElement,th=$('#theme');
+const applyTheme=t=>{root.dataset.theme=t;th.textContent=t==='dark'?'☀':'☾';document.querySelector('meta[name=theme-color]').content=t==='dark'?'#04050d':'#eaf0ff'};
+th.onclick=()=>{const t=root.dataset.theme==='dark'?'light':'dark';applyTheme(t);ls.set('sw-theme',t)};
+applyTheme(root.dataset.theme);
+
+/* controls */
+$('#cc').value=cc;
+$('#cc').onchange=e=>{cc=e.target.value;ls.set('sw-cc',cc);deals=[];stamp=0;skeleton();load()};
+$('#refresh').onclick=load;
+$('#q').oninput=e=>{q=e.target.value.trim().toLowerCase();render()};
+$('#chips').onclick=e=>{const b=e.target.closest('[data-s]');if(!b)return;sort=b.dataset.s;document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c===b));render()};
+
+/* card tilt and cursor glow */
+const grid=$('#grid');
+grid.addEventListener('pointermove',e=>{
+  if(e.pointerType!=='mouse')return;const c=e.target.closest('.card');if(!c)return;
+  const r=c.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;
+  c.style.setProperty('--mx',x*100+'%');c.style.setProperty('--my',y*100+'%');
+  c.style.setProperty('--rx',(.5-y)*8+'deg');c.style.setProperty('--ry',(x-.5)*10+'deg');
+});
+grid.addEventListener('pointerout',e=>{const c=e.target.closest('.card');if(c&&!c.contains(e.relatedTarget)){c.style.removeProperty('--rx');c.style.removeProperty('--ry')}});
+
+/* live updates */
+skeleton();load();
+setInterval(tick,1000);
+setInterval(load,120000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()-stamp>120000)load()});
+</script>
+</body>
+</html>
